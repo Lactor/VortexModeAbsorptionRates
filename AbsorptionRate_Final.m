@@ -1,22 +1,25 @@
 function [GammaPlasmon] = AbsorptionRate_Final...
                             (ni,li,mi, nf,lf,mf, displacement, s, R,  lvortex)
 
-   % By Francisco Machado
+   % By Francisco Machado (fmachado@mit.edu)
    
    % Calculation of the interaction matrix element between state ni,li,mi, and
-   % nf,lf,mf in hydrogen, through a plasmon mode with confinement factor s
+   % nf,lf,mf in hydrogen, through a plasmon mode with confinement
+   % factor s.
+   %
+   % displacement [dx, dy,dz] - displacement in nm of the atom with respect to the
+   % vortex mode. dz = 0 implies the atom is at the surface of the
+   % SP(h)P supporting material
+   displacement = displacement*10^-9; %Transforming into meters
+   %
+   % lvortex - the OAM value of the vortex mode of interest, use -1
+   % for the plane wave SP(h)P mode.
+   %
+   % R is the upper integration limit in the radial integration. A
+   % value of 300 was found to be enough for the convergence of the value.
    
-   % displacement comes in in nm
-   displacement = displacement*10^-9;
    
-   % In the electrostatic approximation q=K we have
-   % that the plasmon propagating in x direction is given by:
-   %    
-   % A = e^{-ksz + iksr} [\hat{x} - i\hat{z}]/\sqrt{2}
-   % 
-   
-   %% Defining x = r/a0
-   
+   %% Defining x = r/a0 the dimensionless distance
    
    %% Defines fundamental constants
    % Compute k to match the energy of the transition
@@ -37,6 +40,11 @@ function [GammaPlasmon] = AbsorptionRate_Final...
    
    
    %% Defines Plane Wave vector potential
+   % In the electrostatic approximation q=K we have
+   % that the plasmon propagating in x direction is given by:
+   %    
+   % A = e^{-ksz + iksr} [\hat{x} - i\hat{z}]/\sqrt{2}
+   % 
    VectorPotX = @(x, theta,phi) (1/sqrt(2)) * exp(-(k*s*a0).*x.*cos(theta) -1i.*(s*k*a0).*x.*sin(theta).*cos(phi)) ...
        .* (1i.*cos(theta) - sin(theta).*cos(phi));
    VectorPotT = @(x, theta,phi) (1/sqrt(2)) * exp(-(k*s*a0).*x.*cos(theta) -1i.*(s*k*a0).*x.*sin(theta).*cos(phi)) ...

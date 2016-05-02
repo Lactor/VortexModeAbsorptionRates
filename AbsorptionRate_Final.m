@@ -80,6 +80,10 @@ function [GammaPlasmon] = AbsorptionRate_Final...
    
    %% Computed Transition for Plane Wave SPP
    if (lvortex == -1)
+
+       %% Computes the matrix element through a simple 3
+       %% dimensional integral. The integrand is computed as the
+       %% inner product of the vector potential and the gradient
         integrand = @(x,theta,phi) - x.^2.*sin(theta).*conj(Psi(nf,lf,mf, x, theta, phi)).* (1i ) .* ...
             (VectorPotX(x,theta,phi) .* gradX(ni,li,mi, x,theta,phi) + ...
              VectorPotT(x,theta,phi) .* gradT(ni,li,mi, x,theta,phi) + ...
@@ -88,8 +92,16 @@ function [GammaPlasmon] = AbsorptionRate_Final...
         MatElement = integral3(integrand, 0, R, 0, pi, 0, 2*pi, 'AbsTol',1e-15, 'RelTol', 1e-3 );
         
    %% Computes Transition for Vortex Mode for centered Atom
-   elseif lvortex > -1 && (sqrt(displacement(1)^2 + displacement(2)^2)) < 10^-15
-       %disp('Centered')
+   elseif lvortex > -1 && (sqrt(displacement(1)^2 + displacement(2)^2)) ...
+           < 10^-15
+
+       % Due to the rotational symmetry of the problem the
+       % azimuthal integration can be done analytical and yield 2pi
+       % when lvortex = mf - mi, and 0 otherwise. The integral is
+       % then computed using the value of phi = 0, although any
+       % would yield the same answer, after absolute value of the
+       % matrix is taken.
+       
        if mi + lvortex - mf == 0
            PotX = @(x,theta) VortexlSpX(s, k, lvortex, x, theta, 0);
            PotT = @(x,theta) VortexlSpT(s, k, lvortex, x, theta, 0);
@@ -108,7 +120,11 @@ function [GammaPlasmon] = AbsorptionRate_Final...
        
    %% Computes Transition for Not Centered Atom (by doing 3d integral)
    elseif lvortex > -1
-       %disp('Not Centered')
+
+       %% Computes the vector potential of the displaced vortex
+       %% mode in spherical coordinates centered at the vortex
+       %% center
+       
        PotXPrime = @(x,theta, phi) VortexLDispX(s, k, lvortex,displacement(1), ...
                                                 displacement(2), x, theta, phi);
        PotTPrime = @(x,theta, phi) VortexLDispT(s, k, lvortex,displacement(1), ...
@@ -116,13 +132,21 @@ function [GammaPlasmon] = AbsorptionRate_Final...
        PotPPrime = @(x,theta, phi) VortexLDispP(s, k, lvortex,displacement(1), ...
                                                 displacement(2), x, theta, phi);
        
+       %% In order to compute the inner product between the
+       %% gradient and the vector potential it is necessary to
+       %% relate the two sets of basis vectors through a change of
+       %% basis matrix
+
+       
+       % Coordinates with respect to the electronic system
        X = @(x,theta,phi) a0*x.*sin(theta).*cos(phi);
        Y = @(x,theta,phi) a0*x.*sin(theta).*sin(phi);
        Z = @(x,theta,phi) a0*x.*cos(theta);
        
        r = @(x,theta,phi) a0*x;
        rho = @(x,theta,phi) a0*x.*sin(theta);
-       
+
+       % Coordinates with respect to the vortex center
        Xprime = @(x,theta,phi) X(x,theta,phi) -displacement(1);
        Yprime = @(x,theta,phi) Y(x,theta,phi) -displacement(2);       
        Zprime = @(x,theta,phi) Z(x,theta,phi);
@@ -131,7 +155,11 @@ function [GammaPlasmon] = AbsorptionRate_Final...
                                       Yprime(x,theta,phi).^2);
        Rprime = @(x,theta,phi) sqrt(rhoprime(x,theta,phi).^2 + ...
                                     Zprime(x,theta,phi).^2);
-       
+
+       % C - Cosine ; S - Sine
+       % TPrime - ThetaPrime  ; PPrime - PhiPrime
+       % Computes the trigonometric function of angles in the
+       % vortex coordinate system
        CTprime = @(x,theta,phi) Zprime(x,theta,phi)./Rprime(x, ...
                                                          theta,phi);
        STprime = @(x,theta,phi) rhoprime(x,theta,phi)./ Rprime(x, ...
@@ -141,6 +169,12 @@ function [GammaPlasmon] = AbsorptionRate_Final...
        SPprime = @(x,theta,phi) Yprime(x,theta,phi) ./ rhoprime(x, ...
                                                          theta,phi);
        
+
+       % R - \hat{r} ; RPrime - \hat{rprime} and analogous to
+       % T - Theta and P - Phi
+
+       % Computes the inner product between the basis vectors of
+       % the two coordinate system forming a 3x3 change of basis matrix
        
        RRprime = @(x,theta,phi) ...
                  (sin(theta).*cos(phi).*STprime(x,theta,phi).*CPprime(x,theta,phi) + ...
@@ -189,7 +223,10 @@ function [GammaPlasmon] = AbsorptionRate_Final...
        
        
        
-              
+       %% Defines the integrand of our 3 dimensional integral as
+       %% the inner product of the two vectors, computed with the
+       %% change of basis matrix.
+       
        integrand = @(x,theta,phi) x.^2.*sin(theta).*conj(Psi(nf,lf,mf, x, theta, phi)).* (1i ) .* ...
             (gradX(ni,li,mi, x,theta,phi) .* ...
                 (PotXPrime(x,theta,phi).*RRprime(x,theta,phi) +...
@@ -203,7 +240,8 @@ function [GammaPlasmon] = AbsorptionRate_Final...
                 (PotXPrime(x,theta,phi).*PRprime(x,theta,phi) +...
                  PotTPrime(x,theta,phi).*PTprime(x,theta,phi) +...
                  PotPPrime(x,theta,phi).*PPprime(x,theta,phi)));
-       
+
+       % Computes the integral.
        MatElement = integral3(integrand, 0, R, 0, pi, 0, 2*pi, ...
                             'AbsTol',1e-8, 'RelTol', 1e-5);
    else

@@ -30,6 +30,9 @@ function [GammaPlasmon] = AbsorptionRate_Final...
    e = 1.6*10^(-19); % (C)
    m = 9.11 * 10^(-31); % (kg)
    alpha = (137.036)^(-1); 
+   epsilonbar = (1+3.9)/2; % Relative average between vaccum/air                       
+   % and SiO2 (source: Analysis and Design of Analog Integrated
+   % Circuits 2009 p. 156)
 
    %% Transition matching momentum and energy
    k = 2*pi * Ryd * abs( 1/nf^2 - 1/ni^2);
@@ -259,7 +262,7 @@ function [GammaPlasmon] = AbsorptionRate_Final...
   
    %% Transition Rate computation
    % Simple formula arises from the field normalization.
-   GammaPlasmon = 2*pi * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
+   GammaPlasmon = (pi/epsilonbar) * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
        * exp(-2*k*s*displacement(3))
    
 end
@@ -381,6 +384,6 @@ function [Ap] = VortexLDispP(s, k,l,x0,y0,  x, theta, phi)
     C = z./sqrt(z.^2 + rho.^2);
 
     Ap= 1/(2*pi)* sqrt(2) * (1i)^(-l) * pi * l * ((x+1i*y)./rho).^l .* exp(-K*z) .* ...
-        (besselj(-l, K*rho))./(K*rho);
+p        (besselj(-l, K*rho))./(K*rho);
 
 end 

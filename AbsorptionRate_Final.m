@@ -1,5 +1,5 @@
-function [GammaPlasmon] = AbsorptionRate_Final...
-                            (ni,li,mi, nf,lf,mf, displacement, s, R,  lvortex)
+function [Gamma] = AbsorptionRate_Final...
+                           (ni,li,mi, nf,lf,mf, displacement, s, R,  lvortex)
 
    % By Francisco Machado (fmachado@mit.edu)
    
@@ -262,8 +262,8 @@ function [GammaPlasmon] = AbsorptionRate_Final...
   
    %% Transition Rate computation
    % Simple formula arises from the field normalization.
-   GammaPlasmon = (pi/epsilonbar) * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
-       * exp(-2*k*s*displacement(3))
+   Gamma = (pi/epsilonbar) * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
+       * exp(-2*k*s*displacement(3));
    
 end
 

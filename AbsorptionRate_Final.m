@@ -262,7 +262,7 @@ function [Gamma] = AbsorptionRate_Final...
   
    %% Transition Rate computation
    % Simple formula arises from the field normalization.
-   Gamma = (pi/epsilonbar) * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
+   Gamma = (2*pi/epsilonbar) * s^3 * omega * alpha^3 * abs(MatElement)^2 ...
        * exp(-2*k*s*displacement(3));
    
 end
@@ -384,6 +384,5 @@ function [Ap] = VortexLDispP(s, k,l,x0,y0,  x, theta, phi)
     C = z./sqrt(z.^2 + rho.^2);
 
     Ap= 1/(2*pi)* sqrt(2) * (1i)^(-l) * pi * l * ((x+1i*y)./rho).^l .* exp(-K*z) .* ...
-p        (besselj(-l, K*rho))./(K*rho);
-
+        (besselj(-l, K*rho))./(K*rho);
 end 
